@@ -1,0 +1,29 @@
+feature
+clicks_week1
+clicks_week2
+clicks_week3
+click_trend
+days_since_last_click
+assessment_click_ratio
+unique_resources
+registered_late
+unregistered_early
+num_of_prev_attempts
+imd_band_enc
+education_enc
+studied_credits
+gender
+disability
+age_band
+region_East Midlands Region
+region_Ireland
+region_London Region
+region_North Region
+region_North Western Region
+region_Scotland
+region_South East Region
+region_South Region
+region_South West Region
+region_Wales
+region_West Midlands Region
+region_Yorkshire Region
