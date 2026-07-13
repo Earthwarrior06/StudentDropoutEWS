@@ -162,9 +162,111 @@ It is very apparent that the higher the level of education, people are far less 
 - RandomForestClassifier
 - XGBClassifier
 ## 2. Mention accuracy percentages
+```bash
+Logistic Regression
+   Metric       Fold1   Fold2   Fold3   Fold4   Fold5    Mean    Std
+  Precision     0.9653  0.9670  0.9731  0.9632  0.9658  0.9669  0.0033
+  Recall        0.8443  0.8476  0.8484  0.8516  0.8472  0.8478  0.0023
+  F1            0.9008  0.9034  0.9065  0.9040  0.9027  0.9035  0.0018
+  Roc_auc       0.9505  0.9541  0.9574  0.9588  0.9548  0.9551  0.0028
 
+
+Random Forest
+   Metric       Fold1   Fold2   Fold3   Fold4   Fold5    Mean    Std
+  Precision     0.9680  0.9728  0.9769  0.9673  0.9759  0.9722  0.0039
+  Recall        0.8519  0.8527  0.8542  0.8548  0.8490  0.8525  0.0020
+  F1            0.9063  0.9088  0.9114  0.9076  0.9081  0.9084  0.0017
+  Roc_auc       0.9595  0.9650  0.9639  0.9659  0.9608  0.9630  0.0025
+
+
+XGBoost
+   Metric       Fold1   Fold2   Fold3   Fold4   Fold5    Mean    Std
+  Precision     0.9517  0.9579  0.9605  0.9515  0.9551  0.9553  0.0035
+  Recall        0.8610  0.8631  0.8686  0.8653  0.8599  0.8636  0.0031
+  F1            0.9041  0.9081  0.9122  0.9064  0.9050  0.9071  0.0029
+  Roc_auc       0.9564  0.9619  0.9620  0.9608  0.9598  0.9602  0.0020
+
+
+Voting Classifier
+   Metric       Fold1   Fold2   Fold3   Fold4   Fold5    Mean    Std
+  Precision     0.9673  0.9684  0.9731  0.9694  0.9716  0.9700  0.0021
+  Recall        0.8541  0.8534  0.8614  0.8566  0.8534  0.8558  0.0030
+  F1            0.9072  0.9073  0.9138  0.9095  0.9087  0.9093  0.0024
+  Roc_auc       0.9586  0.9638  0.9649  0.9657  0.9613  0.9629  0.0026
+```
+### Note:
+- Voting is effectively the average of all the other models and doesn't significantly boost accuracy
+- Voting Classifier also takes a huge amount of time for SHAP to process (approx 12mins for 2K values)
+- For these reasons we got rid of it as a possibility 
 ## 3. Mention Final Choice of ML model
+### XGBoost
+XGBoost was choden as the final model for the below reasons
+- The metric we are trying to maximise is recall and it performed significantly better than the other models
+```bash
+--- Logistic Regression ---
+              precision    recall  f1-score   support
 
+           0       0.91      0.95      0.93      1152
+           1       0.94      0.90      0.92      1140
+
+    accuracy                           0.92      2292
+   macro avg       0.93      0.92      0.92      2292
+weighted avg       0.93      0.92      0.92      2292
+
+--- Random Forest ---
+              precision    recall  f1-score   support
+
+           0       0.92      0.92      0.92      1152
+           1       0.92      0.92      0.92      1140
+
+    accuracy                           0.92      2292
+   macro avg       0.92      0.92      0.92      2292
+weighted avg       0.92      0.92      0.92      2292
+
+--- XGBoost ---
+              precision    recall  f1-score   support
+
+           0       0.93      0.76      0.83      1152
+           1       0.79      0.94      0.86      1140
+
+    accuracy                           0.85      2292
+   macro avg       0.86      0.85      0.85      2292
+weighted avg       0.86      0.85      0.85      2292
+```
+- If anyone wishes to switch to any of the other models these are the following codes
+```bash
+X_scaled = StandardScaler().fit_transform(X)
+lr_params = {
+    "C": [0.01, 0.1, 1, 10, 100],
+    "penalty": ["l1", "l2"],
+    "solver": ["liblinear"],
+}
+print("Tuning Logistic Regression...")
+best_lr = tune_model(LogisticRegression(max_iter=1000), lr_params, X_scaled, y, cv)
+ 
+# Random Forest
+rf_params = {
+    "n_estimators": [100, 200, 300],
+    "max_depth": [ 5, 10, 20],
+    "min_samples_split": [2, 5, 10],
+    "min_samples_leaf": [1, 2, 4],
+}
+print("Tuning Random Forest...")
+best_rf = tune_model(RandomForestClassifier(random_state=42), rf_params, X, y, cv)
+ 
+# XGBoost
+xgb_params = {
+    "model__n_estimators": [100, 200, 300, 500],
+    "model__max_depth": [3, 5, 7, 9],
+    "model__learning_rate": [0.01, 0.05, 0.1, 0.2, 0.3],
+    "model__subsample": [0.7, 0.8, 0.9, 1.0],
+    "model__colsample_bytree": [0.7, 0.8, 0.9, 1.0],
+    "model__min_child_weight": [1, 3, 5]
+}
+print("Tuning XGBoost...")
+pipeline = ImbPipeline(steps=[('scaler',  StandardScaler()),('smote',   SMOTE(random_state=42)),('model',   XGBClassifier(eval_metric="logloss", random_state=42))])
+best_xgb = tune_model(pipeline, xgb_params, X_train, y_train, cv)
+```
 # V. LLM Details
 ## 1. LLM Used and Details
 - gemma4:e2b ran through Ollama
