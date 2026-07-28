@@ -469,7 +469,4 @@ The factors that tend to reduce this prediction are primarily related to recent 
 What this means
 Overall, the prediction is influenced by a balance between past academic achievement and recent engagement with the online learning platform. While factors related to education level and resource access positively influence the assessment, recent inactivity on the VLE has been a significant mitigating factor.  
 ```
-# VI. Streamlit
-## 1. Explain Mistakes made 
-## 2. Explain basic understanding 
-## 3. Explain Choices made
+
